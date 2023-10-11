@@ -32,7 +32,7 @@ public class MongoResource implements QuarkusTestResourceLifecycleManager, DevSe
 
     @Override
     public Map<String, String> start() {
-        storage = new File(System.getProperty("java.io.tmpdir"), "mongo-"+ UUID.randomUUID());
+        storage = new File(System.getProperty("java.io.tmpdir"), "mongo-" + UUID.randomUUID());
         File mongoStorage = new File(storage, "mongo");
         container = new GenericContainer<>(DockerImageName.parse(CONTAINER_IMAGE))
                 .withFileSystemBind(mongoStorage.getAbsolutePath(), "/data/db", BindMode.READ_WRITE)
@@ -44,10 +44,9 @@ public class MongoResource implements QuarkusTestResourceLifecycleManager, DevSe
         containerNetworkId.ifPresent(container::withNetworkMode);
         container.start();
 
-        String mappedPort = Integer.toString(container.getMappedPort(DB_PORT));
-        String connectionUrl = String.format("mongodb://%s:%s@%s:%s", USERNAME, PASSWORD,container.getContainerName(), mappedPort);
+        String connectionUrl = String.format("mongodb://%s:%s@%s:%d", USERNAME, PASSWORD, container.getContainerName().substring(1), DB_PORT);
         return Map.of(
-                "quarkus.mongodb.\"acme\".connection-string", connectionUrl
+                "quarkus.mongodb.acme.connection-string", connectionUrl
         );
     }
 
